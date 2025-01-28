@@ -112,7 +112,41 @@ def route_research(state: SummaryState, config: RunnableConfig) -> Literal["fina
         return "web_research"
     else:
         return "finalize_summary" 
+
+def should_continue(state):
+    # Make sure follow_up_query exists in state with a default value
+    follow_up = state.get('follow_up_query', None)
+    return follow_up is not None and follow_up.lower() != 'no'
+
+def create_graph():
+    workflow = StateGraph(State)
     
+    # Initialize the state with default values
+    workflow.set_entry_point("start")
+    
+    # Add initial state setup
+    workflow.add_node("start", initial_state)
+    workflow.add_node("research", research)
+    workflow.add_node("summarize", summarize)
+    workflow.add_node("follow_up", get_follow_up)
+    
+    # Add edges with proper state handling
+    workflow.add_edge("start", "research")
+    workflow.add_edge("research", "summarize")
+    workflow.add_edge("summarize", "follow_up")
+    
+    # Add conditional edge from follow_up back to research
+    workflow.add_conditional_edges(
+        "follow_up",
+        should_continue,
+        {
+            True: "research",
+            False: END
+        }
+    )
+    
+    return workflow.compile()
+
 # Add nodes and edges 
 builder = StateGraph(SummaryState, input=SummaryStateInput, output=SummaryStateOutput, config_schema=Configuration)
 builder.add_node("generate_query", generate_query)

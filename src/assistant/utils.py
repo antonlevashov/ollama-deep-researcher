@@ -1,6 +1,13 @@
 from langsmith import traceable
 from tavily import TavilyClient
 
+
+# Import Tavily API key
+from dotenv import load_dotenv
+load_dotenv()
+
+
+
 def deduplicate_and_format_sources(search_response, max_tokens_per_source, include_raw_content=True):
     """
     Takes either a single search response or list of responses from Tavily API and formats them.

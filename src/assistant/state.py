@@ -1,6 +1,7 @@
 import operator
 from dataclasses import dataclass, field
 from typing_extensions import TypedDict, Annotated
+from typing import Optional, List, Dict, Any
 
 @dataclass(kw_only=True)
 class SummaryState:
@@ -18,3 +19,18 @@ class SummaryStateInput(TypedDict):
 @dataclass(kw_only=True)
 class SummaryStateOutput(TypedDict):
     running_summary: str = field(default=None) # Final report
+
+class State(TypedDict):
+    query: str
+    research_results: Optional[List[Dict[str, Any]]]
+    summary: Optional[str]
+    follow_up_query: Optional[str]
+
+def initial_state(query: str) -> State:
+    """Initialize the state with the query and default values."""
+    return State(
+        query=query,
+        research_results=None,
+        summary=None,
+        follow_up_query=None  # Initialize with None
+    )
